@@ -12,31 +12,9 @@
 - **细粒度权限控制**：实现按钮和接口级别的权限控制，确保不同用户或角色在界面操作和接口访问时具有不同的权限限制。
 
 ### 在线预览
-- [http://47.111.145.81:3000](http://47.111.145.81:3000)
 - username: admin
 - password: 123456
 
-### 登录页
-
-![image](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/login.jpg)
-### 工作台
-
-![image](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/workbench.jpg)
-
-### 用户管理
-
-![image](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/user.jpg)
-### 角色管理
-
-![image](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/role.jpg)
-
-### 菜单管理
-
-![image](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/menu.jpg)
-
-### API管理
-
-![image](https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/api.jpg)
 
 ### 快速开始
 #### 方法一：dockerhub拉取镜像
@@ -212,27 +190,3 @@ pnpm dev
             ├── system     // 系统管理页面
             └── workbench  // 工作台页面
 ```
-
-### 进群交流
-进群的条件是给项目一个star，小小的star是作者维护下去的动力。
-
-你可以在群里提出任何疑问，我会尽快回复答疑。
-
-<img width="300" src="https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/group.jpg">
-
-## 打赏
-如果项目有帮助到你，可以请作者喝杯咖啡~
-
-<div style="display: flex">
-    <img src="https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/1.jpg" width="300">
-    <img src="https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/2.jpg" width="300">
-</div>
-
-## 定制开发
-如果有基于该项目的定制需求或其他合作，请添加下方微信，备注来意
-
-<img width="300" src="https://github.com/mizhexiaoxiao/vue-fastapi-admin/blob/main/deploy/sample-picture/3.jpg">
-
-### Visitors Count
-
-<img align="left" src = "https://profile-counter.glitch.me/vue-fastapi-admin/count.svg" alt="Loading">
