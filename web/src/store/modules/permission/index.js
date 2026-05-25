@@ -1,19 +1,32 @@
 import { defineStore } from 'pinia'
+import { defineAsyncComponent } from 'vue'
 import { basicRoutes, vueModules } from '@/router/routes'
-import Layout from '@/layout/index.vue'
 import api from '@/api'
+
+const Layout = () => import('@/layout/index.vue')
 
 // * 后端路由相关函数
 // 根据后端传来数据构建出前端路由
 
-function buildRoutes(routes = []) {
+function buildRoutes(routes = [], parentPath = '') {
   return routes.map((e) => {
+    const isCatalog = e.menu_type === 'catalog'
+
+    // 绝对路径直接用，相对路径拼接父路径
+    const fullPath = e.path.startsWith('/')
+      ? e.path
+      : (parentPath ? `${parentPath}/${e.path}` : `/${e.path}`)
+
+    // 如果是目录类型(menu_type=catalog)，component 为 null；否则使用 Layout
     const route = {
       name: e.name,
       path: e.path,
-      component: shallowRef(Layout),
+      fullPath,
+      component: isCatalog ? null : Layout,
       isHidden: e.is_hidden,
       redirect: e.redirect,
+      menuType: e.menu_type,
+      isCatalog,
       meta: {
         title: e.name,
         icon: e.icon,
@@ -24,25 +37,17 @@ function buildRoutes(routes = []) {
     }
 
     if (e.children && e.children.length > 0) {
-      // 有子菜单
-      route.children = e.children.map((e_child) => ({
-        name: e_child.name,
-        path: e_child.path,
-        component: vueModules[`/src/views${e_child.component}/index.vue`],
-        isHidden: e_child.is_hidden,
-        meta: {
-          title: e_child.name,
-          icon: e_child.icon,
-          order: e_child.order,
-          keepAlive: e_child.keepalive,
-        },
-      }))
-    } else {
-      // 没有子菜单，创建一个默认的子路由
+      // 有子菜单，递归处理
+      route.children = buildRoutes(e.children, fullPath)
+    } else if (e.component && e.component !== 'Layout') {
+      // 是叶子节点且有实际组件，加载组件
+      const componentPath = `/src/views${e.component}/index.vue`
+      const componentLoader = vueModules[componentPath]
+      const component = componentLoader ? defineAsyncComponent(componentLoader) : null
       route.children.push({
         name: `${e.name}Default`,
         path: '',
-        component: vueModules[`/src/views${e.component}/index.vue`],
+        component: component,
         isHidden: true,
         meta: {
           title: e.name,

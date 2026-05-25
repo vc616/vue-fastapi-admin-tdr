@@ -87,3 +87,15 @@ class AuditLog(BaseModel, TimestampMixin):
     response_time = fields.IntField(default=0, description="响应时间(单位ms)", index=True)
     request_args = fields.JSONField(null=True, description="请求参数")
     response_body = fields.JSONField(null=True, description="返回数据")
+
+
+class DataSource(BaseModel, TimestampMixin):
+    name = fields.CharField(max_length=100, default="grafana", description="数据源名称")
+    host = fields.CharField(max_length=255, description="数据库地址")
+    port = fields.IntField(default=3306, description="端口")
+    username = fields.CharField(max_length=100, description="用户名")
+    password = fields.CharField(max_length=255, description="密码")
+    database = fields.CharField(max_length=100, description="数据库名称")
+
+    class Meta:
+        table = "datasource"

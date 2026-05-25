@@ -115,11 +115,19 @@ class HttpAuditLogMiddleware(BaseHTTPMiddleware):
         return self.lenient_json(body)
 
     def lenient_json(self, v: Any) -> Any:
-        if isinstance(v, (str, bytes)):
+        if isinstance(v, bytes):
             try:
                 return json.loads(v)
             except (ValueError, TypeError):
-                pass
+                try:
+                    return json.loads(v.decode("utf-8", errors="replace"))
+                except (ValueError, TypeError):
+                    return None
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except (ValueError, TypeError):
+                return None
         return v
 
     async def _async_iter(self, items: list[bytes]) -> AsyncGenerator[bytes, None]:
@@ -160,6 +168,7 @@ class HttpAuditLogMiddleware(BaseHTTPMiddleware):
 
     async def after_request(self, request: Request, response: Response, process_time: int):
         if request.method in self.methods:
+            # Check exclusion before processing response body
             for path in self.exclude_paths:
                 if re.search(path, request.url.path, re.I) is not None:
                     return

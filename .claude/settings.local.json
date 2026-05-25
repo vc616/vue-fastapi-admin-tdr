@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(curl -s http://localhost:9999/api/v1/base/access_token -X POST -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"123456\"}')",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['data']['access_token']\\)\")",
+      "Bash(curl -s http://localhost:9999/api/v1/menus/getUserMenu -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwiaXNfc3VwZXJ1c2VyIjp0cnVlLCJleHAiOjE3Nzk5MzAwMzB9.2HaDbgjBdQA0XN9enO3V2or_0bkFIyzN_1xT1DVGjFs')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s http://localhost:9999/api/v1/base/usermenu -H \"token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwiaXNfc3VwZXJ1c2VyIjp0cnVlLCJleHAiOjE3Nzk5MzAwMzB9.2HaDbgjBdQA0XN9enO3V2or_0bkFIyzN_1xT1DVGjFs\")",
+      "Bash(curl -s http://localhost:3100/equipment/juanchengpump/home)",
+      "Bash(curl -s http://localhost:3100/)",
+      "Bash(node -e ' *)",
+      "Bash(curl *)",
+      "Bash(claude /plugin install engineering-skills@claude-code-skills)",
+      "Bash(python *)",
+      "Bash(pnpm dev *)",
+      "Bash(pnpm approve-builds *)",
+      "Bash(pnpm config *)",
+      "WebFetch(domain:tresjs.org)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm view *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm up *)",
+      "Bash(pnpm list *)",
+      "Bash(pnpm build *)",
+      "Bash(node -e \"const t = require\\('@tresjs/core'\\); console.log\\(Object.keys\\(t\\).filter\\(k => k.includes\\('Group'\\) || k.includes\\('group'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const t = require\\('@tresjs/core'\\); console.log\\(Object.keys\\(t\\).filter\\(k => k.startsWith\\('Tres'\\)\\).sort\\(\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const t = require\\('@tresjs/cientos'\\); console.log\\(Object.keys\\(t\\).filter\\(k => k.includes\\('Group'\\) || k.includes\\('Mesh'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node --input-type=module -e ' *)",
+      "Bash(rm analysis_result.txt)",
+      "Bash(node analyze_model.js)",
+      "Bash(node -e \"const t = require\\('@tresjs/core'\\); console.log\\(Object.keys\\(t\\).filter\\(k => k.includes\\('Loop'\\) || k.includes\\('loop'\\) || k.includes\\('render'\\)\\).join\\('\\\\n'\\)\\)\")"
+    ]
+  }
+}

@@ -21,7 +21,7 @@ const curRoute = useRoute()
 const permissionStore = usePermissionStore()
 const appStore = useAppStore()
 
-const activeKey = computed(() => curRoute.meta?.activeMenu || curRoute.name)
+const activeKey = computed(() => curRoute.meta?.activeMenu || curRoute.path)
 
 const menuOptions = computed(() => {
   return permissionStore.menus.map((item) => getMenuItem(item)).sort((a, b) => a.order - b.order)
@@ -45,10 +45,11 @@ function resolvePath(basePath, path) {
 }
 
 function getMenuItem(route, basePath = '') {
+  const itemPath = resolvePath(basePath, route.path)
   let menuItem = {
     label: (route.meta && route.meta.title) || route.name,
-    key: route.name,
-    path: resolvePath(basePath, route.path),
+    key: itemPath,
+    path: itemPath,
     icon: getIcon(route.meta),
     order: route.meta?.order || 0,
   }
@@ -59,14 +60,18 @@ function getMenuItem(route, basePath = '') {
 
   if (!visibleChildren.length) return menuItem
 
-  if (visibleChildren.length === 1) {
-    // 单个子路由处理
+  // 如果是目录类型(menu_type=catalog)，始终显示子菜单不扁平化
+  const isCatalog = route.menuType === 'catalog' || route.isCatalog
+
+  if (visibleChildren.length === 1 && !isCatalog) {
+    // 单个子路由处理（只有非catalog才扁平化）
     const singleRoute = visibleChildren[0]
+    const childPath = resolvePath(menuItem.path, singleRoute.path)
     menuItem = {
       ...menuItem,
       label: singleRoute.meta?.title || singleRoute.name,
-      key: singleRoute.name,
-      path: resolvePath(menuItem.path, singleRoute.path),
+      key: childPath,
+      path: childPath,
       icon: getIcon(singleRoute.meta),
     }
     const visibleItems = singleRoute.children
@@ -98,10 +103,12 @@ function handleMenuSelect(key, item) {
   if (isExternal(item.path)) {
     window.open(item.path)
   } else {
-    if (item.path === curRoute.path) {
+    // 如果是目录类型且有 redirect，优先跳转到 redirect
+    const targetPath = item.redirect || item.path
+    if (targetPath === curRoute.path) {
       appStore.reloadPage()
     } else {
-      router.push(item.path)
+      router.push(targetPath)
     }
   }
 }

@@ -39,4 +39,13 @@ export default {
   deleteDept: (params = {}) => request.delete('/dept/delete', { params }),
   // auditlog
   getAuditLogList: (params = {}) => request.get('/auditlog/list', { params }),
+  // datasource
+  getDataSourceList: (params = {}) => request.get('/datasource/list', { params }),
+  getDataSource: (params = {}) => request.get('/datasource/get', { params }),
+  createDataSource: (data = {}) => request.post('/datasource/create', data),
+  updateDataSource: (data = {}) => request.post('/datasource/update', data),
+  deleteDataSource: (params = {}) => request.delete('/datasource/delete', { params }),
+  exportData: (params = {}) => request.get('/datasource/export', { params, responseType: 'blob' }),
+  getDataSourceTables: (params = {}) => request.get('/datasource/tables', { params }),
+  getDataSourceColumns: (params = {}) => request.get('/datasource/columns', { params }),
 }

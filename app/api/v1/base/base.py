@@ -59,19 +59,17 @@ async def get_user_menu():
             menu = await role_obj.menus
             menus.extend(menu)
         menus = list(set(menus))
-    parent_menus: list[Menu] = []
-    for menu in menus:
-        if menu.parent_id == 0:
-            parent_menus.append(menu)
-    res = []
-    for parent_menu in parent_menus:
-        parent_menu_dict = await parent_menu.to_dict()
-        parent_menu_dict["children"] = []
-        for menu in menus:
-            if menu.parent_id == parent_menu.id:
-                parent_menu_dict["children"].append(await menu.to_dict())
-        res.append(parent_menu_dict)
-    return Success(data=res)
+
+    async def build_menu_tree(menu_list: list[Menu], parent_id: int) -> list:
+        result = []
+        for menu in menu_list:
+            if menu.parent_id == parent_id:
+                menu_dict = await menu.to_dict()
+                menu_dict["children"] = await build_menu_tree(menu_list, menu.id)
+                result.append(menu_dict)
+        return result
+
+    return Success(data=await build_menu_tree(menus, 0))
 
 
 @router.get("/userapi", summary="查看用户API", dependencies=[DependAuth])

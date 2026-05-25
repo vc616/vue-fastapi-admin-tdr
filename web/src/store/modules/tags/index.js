@@ -25,10 +25,16 @@ export const useTagsStore = defineStore('tag', {
       lStorage.set('tags', tags)
     },
     addTag(tag = {}) {
+      if (WITHOUT_TAG_PATHS.includes(tag.path)) return
+      const existsIndex = this.tags.findIndex((item) => item.path === tag.path)
+      if (existsIndex !== -1) {
+        // 已存在：先移除旧的，再添加到末尾
+        const newTags = this.tags.filter((item) => item.path !== tag.path)
+        this.setTags([...newTags, tag])
+      } else {
+        this.setTags([...this.tags, tag])
+      }
       this.setActiveTag(tag.path)
-      if (WITHOUT_TAG_PATHS.includes(tag.path) || this.tags.some((item) => item.path === tag.path))
-        return
-      this.setTags([...this.tags, tag])
     },
     removeTag(path) {
       if (path === this.activeTag) {

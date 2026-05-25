@@ -44,6 +44,7 @@ def make_middlewares():
             methods=["GET", "POST", "PUT", "DELETE"],
             exclude_paths=[
                 "/api/v1/base/access_token",
+                "/api/v1/datasource/export",
                 "/docs",
                 "/openapi.json",
             ],
@@ -87,7 +88,7 @@ async def init_menus():
             path="/system",
             order=1,
             parent_id=0,
-            icon="carbon:gui-management",
+            icon="carbon:settings",
             is_hidden=False,
             component="Layout",
             keepalive=False,
@@ -100,7 +101,7 @@ async def init_menus():
                 path="user",
                 order=1,
                 parent_id=parent_menu.id,
-                icon="material-symbols:person-outline-rounded",
+                icon="carbon:user",
                 is_hidden=False,
                 component="/system/user",
                 keepalive=False,
@@ -111,7 +112,7 @@ async def init_menus():
                 path="role",
                 order=2,
                 parent_id=parent_menu.id,
-                icon="carbon:user-role",
+                icon="carbon:user-admin",
                 is_hidden=False,
                 component="/system/role",
                 keepalive=False,
@@ -122,7 +123,7 @@ async def init_menus():
                 path="menu",
                 order=3,
                 parent_id=parent_menu.id,
-                icon="material-symbols:list-alt-outline",
+                icon="carbon:menu",
                 is_hidden=False,
                 component="/system/menu",
                 keepalive=False,
@@ -133,7 +134,7 @@ async def init_menus():
                 path="api",
                 order=4,
                 parent_id=parent_menu.id,
-                icon="ant-design:api-outlined",
+                icon="carbon:api",
                 is_hidden=False,
                 component="/system/api",
                 keepalive=False,
@@ -144,7 +145,7 @@ async def init_menus():
                 path="dept",
                 order=5,
                 parent_id=parent_menu.id,
-                icon="mingcute:department-line",
+                icon="carbon:organization",
                 is_hidden=False,
                 component="/system/dept",
                 keepalive=False,
@@ -155,25 +156,78 @@ async def init_menus():
                 path="auditlog",
                 order=6,
                 parent_id=parent_menu.id,
-                icon="ph:clipboard-text-bold",
+                icon="carbon:report",
                 is_hidden=False,
                 component="/system/auditlog",
                 keepalive=False,
             ),
+            Menu(
+                menu_type=MenuType.MENU,
+                name="数据源",
+                path="datasource",
+                order=7,
+                parent_id=parent_menu.id,
+                icon="carbon:datastore",
+                is_hidden=False,
+                component="/system/datasource",
+                keepalive=False,
+            ),
         ]
         await Menu.bulk_create(children_menu)
-        await Menu.create(
-            menu_type=MenuType.MENU,
-            name="一级菜单",
-            path="/top-menu",
+
+        # 设备管理一级菜单
+        equipment_menu = await Menu.create(
+            menu_type=MenuType.CATALOG,
+            name="设备管理",
+            path="/equipment",
             order=2,
             parent_id=0,
-            icon="material-symbols:featured-play-list-outline",
+            icon="carbon:devices",
             is_hidden=False,
-            component="/top-menu",
+            component="Layout",
             keepalive=False,
-            redirect="",
+            redirect="/equipment/juanchengpump/home",
         )
+
+        # 鄄城取水泵站子菜单
+        juancheng_menu = await Menu.create(
+            menu_type=MenuType.CATALOG,
+            name="鄄城取水泵站",
+            path="juanchengpump",
+            order=1,
+            parent_id=equipment_menu.id,
+            icon="carbon:rain-drop",
+            is_hidden=False,
+            component="Layout",
+            keepalive=False,
+            redirect="/equipment/juanchengpump/home",
+        )
+
+        juancheng_children = [
+            Menu(
+                menu_type=MenuType.MENU,
+                name="设备主页",
+                path="home",
+                order=1,
+                parent_id=juancheng_menu.id,
+                icon="carbon:dashboard",
+                is_hidden=False,
+                component="/equipment/juanchengpump",
+                keepalive=False,
+            ),
+            Menu(
+                menu_type=MenuType.MENU,
+                name="数据源配置",
+                path="config",
+                order=2,
+                parent_id=juancheng_menu.id,
+                icon="carbon:settings-adjust",
+                is_hidden=False,
+                component="/equipment/juanchengpump/datasource-config",
+                keepalive=False,
+            ),
+        ]
+        await Menu.bulk_create(juancheng_children)
 
 
 async def init_apis():
