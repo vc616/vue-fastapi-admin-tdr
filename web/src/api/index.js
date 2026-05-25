@@ -48,4 +48,7 @@ export default {
   exportData: (params = {}) => request.get('/datasource/export', { params, responseType: 'blob' }),
   getDataSourceTables: (params = {}) => request.get('/datasource/tables', { params }),
   getDataSourceColumns: (params = {}) => request.get('/datasource/columns', { params }),
+  // statistics
+  getStatisticsDashboard: (params = {}) => request.get('/statistics/dashboard', { params }),
+  getStatisticsChart: (params = {}) => request.get('/statistics/chart', { params }),
 }
