@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import { useDark } from '@vueuse/core'
 import { lStorage } from '@/utils'
 import i18n from '~/i18n'
@@ -23,6 +24,9 @@ export const useAppStore = defineStore('app', {
     async reloadPage() {
       $loadingBar.start()
       this.reloadFlag = false
+      const key = this.aliveKeys['__reload__'] || 0
+      this.aliveKeys['__reload__'] = key + 1
+      await nextTick()
       await nextTick()
       this.reloadFlag = true
 

@@ -1,9 +1,8 @@
 <script setup>
 import dayjs from 'dayjs'
 import api from '@/api'
-import ModelViewer from '@/components/3d/ModelViewer.vue'
 
-defineOptions({ name: '设备详情' })
+defineOptions({ name: '设备主页' })
 
 const route = useRoute()
 const iframeRef = ref(null)
@@ -19,7 +18,6 @@ const error = ref(null)
 const grafanaPidUrl = computed(() => {
   if (!projectConfig.value?.grafana_url) return null
   const url = projectConfig.value.grafana_url
-  // 如果是 iframe HTML，提取 src 属性
   const match = url.match(/src=["']([^"']+)["']/)
   return match ? match[1] : url
 })
@@ -46,16 +44,13 @@ onMounted(async () => {
     isFullscreen.value = !!document.fullscreenElement
   })
 
-  // 从路由获取项目路径（路由路径格式：/equipment/{projectPath}）
-  const projectPath = route.path.split('/').pop()
+  const projectPath = route.query.path || new URLSearchParams(window.location.search).get('path') || ''
   if (!projectPath) {
     error.value = '缺少项目路径参数'
     loading.value = false
     return
   }
 
-  loading.value = true
-  error.value = null
   try {
     const res = await api.getProjectByPath(projectPath)
     if (res.code === 200 && res.data) {
@@ -113,12 +108,6 @@ function toggleFullscreen() {
   } else {
     document.exitFullscreen()
     isFullscreen.value = false
-  }
-}
-
-function openGrafanaUrl() {
-  if (grafanaPidUrl.value) {
-    window.open(grafanaPidUrl.value, '_blank')
   }
 }
 
@@ -181,15 +170,19 @@ async function handleExport() {
     <template v-else-if="projectConfig">
       <n-tabs type="line" animated>
         <n-tab-pane name="preview" tab="设备预览">
-          <div style="height: 800px;">
-            <ModelViewer
-              v-if="projectConfig?.model_3d_url"
-              :model-path="projectConfig.model_3d_url"
-              :camera-position="[0, 1, 3]"
-              :target="[0, 0, 0]"
-              :model-rotation="[0, 0, 0]"
+          <div class="relative">
+            <n-button class="absolute right-4 top-4 z-10" @click="toggleFullscreen">
+              {{ isFullscreen ? '退出全屏' : '全屏' }}
+            </n-button>
+            <iframe
+              v-if="projectConfig.grafana_panel_url"
+              ref="iframeRef"
+              :src="projectConfig.grafana_panel_url"
+              width="100%"
+              height="1000px"
+              frameborder="0"
             />
-            <n-empty v-else description="该项目未配置3D模型" />
+            <n-empty v-else description="该项目未配置Grafana面板URL" />
           </div>
         </n-tab-pane>
 
@@ -214,14 +207,14 @@ async function handleExport() {
               {{ isFullscreen ? '退出全屏' : '全屏' }}
             </n-button>
             <iframe
-              v-if="projectConfig.grafana_panel_url"
+              v-if="projectConfig.grafana_url"
               ref="iframeRef"
-              :src="projectConfig.grafana_panel_url"
+              :src="projectConfig.grafana_url"
               width="100%"
               height="1000px"
               frameborder="0"
             />
-            <n-empty v-else description="该项目未配置Grafana面板URL" />
+            <n-empty v-else description="该项目未配置Grafana Dashboard URL" />
           </div>
         </n-tab-pane>
 
@@ -300,7 +293,7 @@ async function handleExport() {
               <div class="action-bar">
                 <div class="export-info">
                   <span v-if="exportForm.selectedFields.length">
-                    已选择 {{ exportForm.value.selectedFields.length }} 个字段
+                    已选择 {{ exportForm.selectedFields.length }} 个字段
                   </span>
                 </div>
                 <n-space>

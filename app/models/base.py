@@ -1,4 +1,5 @@
 import asyncio
+import json
 from datetime import datetime
 
 from tortoise import fields, models
@@ -19,6 +20,12 @@ class BaseModel(models.Model):
                 value = getattr(self, field)
                 if isinstance(value, datetime):
                     value = value.strftime(settings.DATETIME_FORMAT)
+                # JSON字段反序列化（存储为字符串的列表/字典）
+                elif isinstance(value, str) and value.startswith(('[', '{')):
+                    try:
+                        value = json.loads(value)
+                    except (json.JSONDecodeError, ValueError):
+                        pass
                 d[field] = value
 
         if m2m:

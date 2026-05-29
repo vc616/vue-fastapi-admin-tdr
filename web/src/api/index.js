@@ -2,6 +2,8 @@ import { request } from '@/utils'
 
 export default {
   login: (data) => request.post('/base/access_token', data, { noNeedToken: true }),
+  sendVerifyCode: (data) => request.post('/base/send_verify_code', data, { noNeedToken: true }),
+  resetPassword: (data) => request.post('/base/reset_password', data, { noNeedToken: true }),
   getUserInfo: () => request.get('/base/userinfo'),
   getUserMenu: () => request.get('/base/usermenu'),
   getUserApi: () => request.get('/base/userapi'),
@@ -13,7 +15,8 @@ export default {
   createUser: (data = {}) => request.post('/user/create', data),
   updateUser: (data = {}) => request.post('/user/update', data),
   deleteUser: (params = {}) => request.delete(`/user/delete`, { params }),
-  resetPassword: (data = {}) => request.post(`/user/reset_password`, data),
+  // users - admin reset password (different endpoint)
+  adminResetPassword: (data = {}) => request.post(`/user/reset_password`, data),
   // role
   getRoleList: (params = {}) => request.get('/role/list', { params }),
   createRole: (data = {}) => request.post('/role/create', data),
@@ -48,7 +51,25 @@ export default {
   exportData: (params = {}) => request.get('/datasource/export', { params, responseType: 'blob' }),
   getDataSourceTables: (params = {}) => request.get('/datasource/tables', { params }),
   getDataSourceColumns: (params = {}) => request.get('/datasource/columns', { params }),
+  getDataSourceConfig: (configKey) => request.get(`/datasource/config/${configKey}`, { noNeedToken: true }),
+  saveDataSourceConfig: (configKey, data) => request.post(`/datasource/config/${configKey}`, data, { noNeedToken: true }),
   // statistics
   getStatisticsDashboard: (params = {}) => request.get('/statistics/dashboard', { params }),
   getStatisticsChart: (params = {}) => request.get('/statistics/chart', { params }),
+  // project
+  getProjectList: (params = {}) => request.get('/project/list', { params }),
+  getProject: (params = {}) => request.get('/project/get', { params }),
+  getProjectByPath: (path) => request.get(`/project/get_by_path/${path}`),
+  createProject: (data = {}) => request.post('/project/create', data),
+  updateProject: (data = {}) => request.post('/project/update', data),
+  deleteProject: (params = {}) => request.delete(`/project/delete/${params.id}`, { params }),
+  getProjectTables: (params = {}) => request.get('/project/tables', { params }),
+  getProjectColumns: (params = {}) => request.get('/project/columns', { params }),
+  exportProjectData: (params = {}) => request.get('/project/export', { params, responseType: 'blob' }),
+  uploadProjectModel: (file, projectPath = null) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const url = projectPath ? `/project/upload_model?project_path=${encodeURIComponent(projectPath)}` : '/project/upload_model'
+    return request.post(url, formData, { noNeedToken: true })
+  },
 }

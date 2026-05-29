@@ -45,6 +45,7 @@ def make_middlewares():
             exclude_paths=[
                 "/api/v1/base/access_token",
                 "/api/v1/datasource/export",
+                "/api/v1/project/upload_model",
                 "/docs",
                 "/openapi.json",
             ],

@@ -99,3 +99,26 @@ class DataSource(BaseModel, TimestampMixin):
 
     class Meta:
         table = "datasource"
+
+
+class Project(BaseModel, TimestampMixin):
+    name = fields.CharField(max_length=100, description="项目名称")
+    path = fields.CharField(max_length=100, unique=True, description="路径标识")
+    icon = fields.CharField(max_length=100, null=True, description="图标")
+    order = fields.IntField(default=0, description="排序")
+    datasource_id = fields.IntField(null=True, description="关联数据源ID")
+    table_name = fields.CharField(max_length=100, null=True, description="数据表名")
+    grafana_url = fields.CharField(max_length=500, null=True, description="Grafana dashboard URL")
+    grafana_panel_url = fields.CharField(max_length=500, null=True, description="Grafana panel URL")
+    model_3d_url = fields.CharField(max_length=500, null=True, description="3D模型文件路径")
+    # 3D视图参数
+    camera_position = fields.CharField(max_length=100, null=True, description="相机位置")
+    model_target = fields.CharField(max_length=100, null=True, description="旋转轴心")
+    model_rotation = fields.CharField(max_length=100, null=True, description="模型初始旋转")
+    auto_rotate = fields.BooleanField(default=False, description="是否自动旋转")
+    auto_rotate_speed = fields.FloatField(default=1.0, description="自动旋转速度")
+    is_hidden = fields.BooleanField(default=False, description="是否隐藏")
+    keepalive = fields.BooleanField(default=True, description="存活")
+
+    class Meta:
+        table = "project"

@@ -2,13 +2,14 @@ from datetime import datetime
 from typing import Optional
 
 import pymysql
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from tortoise.expressions import Q
 
 from app.controllers.datasource import datasource_controller
-from app.schemas import Success, SuccessExtra
+from app.schemas import Fail, Success, SuccessExtra
 from app.schemas.datasource import DataSourceCreate, DataSourceUpdate
+from app.utils.config_store import load_config, save_config
 
 router = APIRouter()
 
@@ -203,3 +204,21 @@ async def export_data(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"导出失败: {str(e)}")
+
+
+@router.get("/config/{config_key}", summary="获取配置", dependencies=[])
+async def get_config(config_key: str):
+    """获取指定配置"""
+    config = load_config(config_key)
+    if config is None:
+        return Success(data={})
+    return Success(data=config)
+
+
+@router.post("/config/{config_key}", summary="保存配置", dependencies=[])
+async def save_datasource_config(config_key: str, data: dict = Body(...)):
+    """保存指定配置"""
+    success = save_config(config_key, data)
+    if not success:
+        return Fail(msg="保存配置失败")
+    return Success(msg="配置保存成功")

@@ -26,6 +26,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             obj_dict = obj_in
         else:
             obj_dict = obj_in.model_dump()
+        # JSON序列化list/dict字段
+        for key, value in obj_dict.items():
+            if isinstance(value, (list, dict)):
+                import json
+                obj_dict[key] = json.dumps(value)
         obj = self.model(**obj_dict)
         await obj.save()
         return obj
@@ -35,6 +40,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             obj_dict = obj_in
         else:
             obj_dict = obj_in.model_dump(exclude_unset=True, exclude={"id"})
+        # JSON序列化list/dict字段
+        for key, value in obj_dict.items():
+            if isinstance(value, (list, dict)):
+                import json
+                obj_dict[key] = json.dumps(value)
         obj = await self.get(id=id)
         obj = obj.update_from_dict(obj_dict)
         await obj.save()

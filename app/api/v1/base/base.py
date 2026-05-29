@@ -8,10 +8,12 @@ from app.core.dependency import DependAuth
 from app.models.admin import Api, Menu, Role, User
 from app.schemas.base import Fail, Success
 from app.schemas.login import *
-from app.schemas.users import UpdatePassword
+from app.schemas.users import SendVerifyCode, ResetPassword, UpdatePassword
 from app.settings import settings
+from app.utils.email import generate_verify_code, send_verify_code_email
 from app.utils.jwt_utils import create_access_token
 from app.utils.password import get_password_hash, verify_password
+from app.utils.verify_code import verify_code_store
 
 router = APIRouter()
 
@@ -42,7 +44,7 @@ async def get_userinfo():
     user_id = CTX_USER_ID.get()
     user_obj = await user_controller.get(id=user_id)
     data = await user_obj.to_dict(exclude_fields=["password"])
-    data["avatar"] = "https://avatars.githubusercontent.com/u/54677442?v=4"
+    data["avatar"] = f"https://ui-avatars.com/api/?name={user_obj.username}&background=1a1a2e&color=60a5fa&size=128&font-size=0.4&bold=true"
     return Success(data=data)
 
 
@@ -99,3 +101,42 @@ async def update_user_password(req_in: UpdatePassword):
     user.password = get_password_hash(req_in.new_password)
     await user.save()
     return Success(msg="修改成功")
+
+
+@router.post("/send_verify_code", summary="发送验证码")
+async def send_verify_code(req_in: SendVerifyCode):
+    user = await User.filter(username=req_in.email).first()
+    if not user:
+        return Fail(msg="该用户名不存在")
+
+    if not user.email:
+        return Fail(msg="该用户未绑定邮箱，请联系管理员")
+
+    code = generate_verify_code()
+    verify_code_store.set(user.email, code, settings.VERIFY_CODE_EXPIRE_MINUTES * 60)
+
+    if not settings.EMAIL_USERNAME or not settings.EMAIL_PASSWORD:
+        return Fail(msg="邮件服务未配置")
+
+    success = send_verify_code_email(user.email, code)
+    if not success:
+        return Fail(msg="发送验证码失败")
+
+    return Success(msg="验证码已发送")
+
+
+@router.post("/reset_password", summary="重置密码")
+async def reset_password(req_in: ResetPassword):
+    user = await User.filter(username=req_in.email).first()
+    if not user:
+        return Fail(msg="该用户名不存在")
+
+    if not user.email:
+        return Fail(msg="该用户未绑定邮箱，请联系管理员")
+
+    if not verify_code_store.verify(user.email, req_in.code):
+        return Fail(msg="验证码错误或已过期")
+
+    user.password = get_password_hash(req_in.new_password)
+    await user.save()
+    return Success(msg="密码重置成功")

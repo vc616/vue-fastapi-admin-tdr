@@ -90,8 +90,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref, nextTick } from 'vue'
+import { h, onMounted, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { NTag } from 'naive-ui'
 import * as echarts from 'echarts'
 import { useUserStore } from '@/store'
 import api from '@/api'

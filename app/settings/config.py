@@ -90,5 +90,19 @@ class Settings(BaseSettings):
     }
     DATETIME_FORMAT: str = "%Y-%m-%d %H:%M:%S"
 
+    # 配置文件存储路径
+    CONFIG_ROOT: str = os.path.join(BASE_DIR, "data")
+
+    # 邮件配置
+    EMAIL_HOST: str = "smtp.qq.com"
+    EMAIL_PORT: int = 587
+    EMAIL_USERNAME: str = "vc616@qq.com"
+    EMAIL_PASSWORD: str = "gxcnbqgdmlubbiid"
+    EMAIL_FROM: str = "vc616@qq.com"
+    EMAIL_USE_TLS: bool = True
+
+    # 验证码有效期（分钟）
+    VERIFY_CODE_EXPIRE_MINUTES: int = 5
+
 
 settings = Settings()

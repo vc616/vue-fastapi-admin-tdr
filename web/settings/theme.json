@@ -8,30 +8,65 @@
   },
   "naiveThemeOverrides": {
     "common": {
-      "primaryColor": "#F4511E",
-      "primaryColorHover": "#F4511E",
-      "primaryColorPressed": "#2B4C59FF",
-      "primaryColorSuppl": "#F4511E",
+      "primaryColor": "#0F172A",
+      "primaryColorHover": "#1E293B",
+      "primaryColorPressed": "#334155",
+      "primaryColorSuppl": "#22C55E",
 
-      "infoColor": "#2080F0FF",
-      "infoColorHover": "#4098FCFF",
-      "infoColorPressed": "#1060C9FF",
-      "infoColorSuppl": "#4098FCFF",
+      "infoColor": "#3B82F6FF",
+      "infoColorHover": "#60A5FAFF",
+      "infoColorPressed": "#2563EBFF",
+      "infoColorSuppl": "#60A5FAFF",
 
-      "successColor": "#18A058FF",
-      "successColorHover": "#F4511E",
-      "successColorPressed": "#0C7A43FF",
-      "successColorSuppl": "#F4511E",
+      "successColor": "#22C55EFF",
+      "successColorHover": "#4ADE80FF",
+      "successColorPressed": "#16A34AFF",
+      "successColorSuppl": "#4ADE80FF",
 
-      "warningColor": "#F0A020FF",
-      "warningColorHover": "#FCB040FF",
-      "warningColorPressed": "#C97C10FF",
-      "warningColorSuppl": "#FCB040FF",
+      "warningColor": "#F59E0BFF",
+      "warningColorHover": "#FBBF24FF",
+      "warningColorPressed": "#D97706FF",
+      "warningColorSuppl": "#FBBF24FF",
 
-      "errorColor": "#D03050FF",
-      "errorColorHover": "#DE576DFF",
-      "errorColorPressed": "#AB1F3FFF",
-      "errorColorSuppl": "#DE576DFF"
+      "errorColor": "#EF4444FF",
+      "errorColorHover": "#F87171FF",
+      "errorColorPressed": "#DC2626FF",
+      "errorColorSuppl": "#F87171FF",
+
+      "borderRadius": "8px",
+      "borderRadiusSmall": "6px"
+    },
+    "Button": {
+      "textColor": "#FFFFFF",
+      "colorPrimary": "#0F172A",
+      "colorPrimaryHover": "#1E293B",
+      "colorPrimaryPressed": "#334155",
+      "colorPrimarySuppl": "#22C55E"
+    },
+    "Card": {
+      "borderRadius": "12px",
+      "borderColor": "rgba(51, 65, 85, 0.3)"
+    },
+    "Input": {
+      "borderRadius": "8px",
+      "border": "1px solid #334155",
+      "borderHover": "1px solid #22C55E",
+      "borderFocus": "1px solid #22C55E",
+      "boxShadowFocus": "0 0 0 2px rgba(34, 197, 94, 0.2)"
+    },
+    "Table": {
+      "borderRadius": "12px",
+      "borderColor": "#334155",
+      "thColor": "#1E293B",
+      "tdColor": "#0F172A",
+      "thTextColor": "#F8FAFC",
+      "tdTextColor": "#F8FAFC"
+    },
+    "Layout": {
+      "siderColor": "#0F172A",
+      "headerColor": "#0F172A",
+      "bodyColor": "#020617",
+      "footerColor": "#0F172A"
     }
   }
 }

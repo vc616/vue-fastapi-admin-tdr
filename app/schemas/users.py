@@ -42,3 +42,13 @@ class UserUpdate(BaseModel):
 class UpdatePassword(BaseModel):
     old_password: str = Field(description="旧密码")
     new_password: str = Field(description="新密码")
+
+
+class SendVerifyCode(BaseModel):
+    email: str = Field(description="用户名")
+
+
+class ResetPassword(BaseModel):
+    email: str = Field(description="用户名")
+    code: str = Field(description="验证码")
+    new_password: str = Field(description="新密码")

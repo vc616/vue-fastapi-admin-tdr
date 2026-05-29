@@ -7,10 +7,13 @@ body {
 
 html {
   font-size: 4px; // * 1rem = 4px  方便unocss计算：在unocss中 1字体单位 = 0.25rem，相当于 1等份 = 1px
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 body {
   font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
@@ -18,10 +21,19 @@ body {
   height: 100%;
 }
 
+/* Dark mode background */
+:root {
+  --bg-main: #F8FAFC;
+}
+
+html.dark {
+  --bg-main: #020617;
+}
+
 /* transition fade-slide */
 .fade-slide-leave-active,
 .fade-slide-enter-active {
-  transition: all 0.3s;
+  transition: all 0.3s ease-out;
 }
 
 .fade-slide-enter-from {
@@ -69,6 +81,22 @@ body {
     }
     &::-webkit-scrollbar-thumb:hover {
       background: var(--primary-color);
+    }
+  }
+}
+
+/* Dark mode scrollbar */
+html.dark {
+  .cus-scroll,
+  .cus-scroll-x,
+  .cus-scroll-y {
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        background: #475569;
+      }
+      &::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+      }
     }
   }
 }

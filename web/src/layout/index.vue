@@ -1,5 +1,5 @@
 <template>
-  <n-layout has-sider wh-full>
+  <n-layout has-sider wh-full :class="isDark ? 'dark-layout' : 'light-layout'">
     <n-layout-sider
       bordered
       collapse-mode="width"
@@ -7,22 +7,23 @@
       :width="220"
       :native-scrollbar="false"
       :collapsed="appStore.collapsed"
+      :class="isDark ? 'sider-dark' : 'sider-light'"
     >
       <SideBar />
     </n-layout-sider>
 
     <article flex-col flex-1 overflow-hidden>
       <header
-        class="flex items-center border-b bg-white px-15 bc-eee"
-        dark="bg-dark border-0"
+        class="flex items-center border-b px-15"
+        :class="isDark ? 'bg-dark-1 border-dark-3' : 'bg-white border-gray-200'"
         :style="`height: ${header.height}px`"
       >
         <AppHeader />
       </header>
-      <section v-if="tags.visible" hidden border-b bc-eee sm:block dark:border-0>
+      <section v-if="tags.visible" hidden border-b sm:block :class="isDark ? 'bg-dark-1 border-dark-3' : 'bg-white border-gray-200'">
         <AppTags :style="{ height: `${tags.height}px` }" />
       </section>
-      <section flex-1 overflow-hidden bg-hex-f5f6fb dark:bg-hex-101014>
+      <section flex-1 overflow-hidden :class="isDark ? 'bg-dark' : 'bg-gray-50'">
         <AppMain />
       </section>
     </article>
@@ -36,11 +37,14 @@ import AppMain from './components/AppMain.vue'
 import AppTags from './components/tags/index.vue'
 import { useAppStore } from '@/store'
 import { header, tags } from '~/settings'
+import { useDark } from '@vueuse/core'
+
+const appStore = useAppStore()
+const isDark = useDark()
 
 // 移动端适配
 import { useBreakpoints } from '@vueuse/core'
 
-const appStore = useAppStore()
 const breakpointsEnum = {
   xl: 1600,
   lg: 1199,
@@ -54,21 +58,35 @@ const isPad = breakpoints.between('sm', 'md')
 const isPC = breakpoints.greater('md')
 watchEffect(() => {
   if (isMobile.value) {
-    // Mobile
     appStore.setCollapsed(true)
     appStore.setFullScreen(false)
   }
 
   if (isPad.value) {
-    // IPad
     appStore.setCollapsed(true)
     appStore.setFullScreen(false)
   }
 
   if (isPC.value) {
-    // PC
     appStore.setCollapsed(false)
     appStore.setFullScreen(true)
   }
 })
 </script>
+
+<style scoped>
+.light-layout {
+  background: #F8FAFC;
+}
+.dark-layout {
+  background: #020617;
+}
+.sider-light {
+  background: #ffffff;
+  border-color: #e5e7eb;
+}
+.sider-dark {
+  background: #0F172A;
+  border-color: #334155;
+}
+</style>

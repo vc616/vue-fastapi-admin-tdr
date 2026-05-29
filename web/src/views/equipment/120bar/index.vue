@@ -2,13 +2,31 @@
   <AppPage>
     <n-tabs type="line" animated>
       <n-tab-pane name="preview" tab="设备预览">
-        <div class="relative">
-          <iframe
-            src="http://192.168.6.91:3000/d-solo/ad6rmdl/e696b0-e5bbba-e4bbaa-e8a1a8-e69dbf?orgId=1&from=1779338320498&to=1779359920498&timezone=Asia%2FShanghai&theme=dark&panelId=panel-1"
-            width="450"
-            height="200"
-            frameborder="0"
+        <div style="height: 800px;">
+          <ModelViewer
+            v-if="projectConfig?.model_3d_url"
+            :model-path="projectConfig.model_3d_url"
+            :camera-position="projectConfig.camera_position || [0, 2, 5]"
+            :target="projectConfig.model_target || [0, 0, 0]"
+            :model-rotation="projectConfig.model_rotation || [0, 0, 0]"
+            :auto-rotate="projectConfig.auto_rotate || false"
+            :auto-rotate-speed="projectConfig.auto_rotate_speed || 1"
           />
+          <n-empty v-else description="该项目未配置3D模型" />
+        </div>
+      </n-tab-pane>
+      <n-tab-pane name="pid" tab="PID">
+        <div class="pid-container">
+          <div v-if="grafanaPidUrl" class="pid-iframe-wrapper">
+            <iframe
+              :src="grafanaPidUrl"
+              width="100%"
+              height="100%"
+              frameborder="0"
+              class="pid-iframe"
+            />
+          </div>
+          <n-empty v-else description="该项目未配置 Grafana PID" />
         </div>
       </n-tab-pane>
       <n-tab-pane name="dashboard" tab="仪表板">
@@ -17,12 +35,14 @@
             {{ isFullscreen ? '退出全屏' : '全屏' }}
           </n-button>
           <iframe
+            v-if="projectConfig?.grafana_panel_url"
             ref="iframeRef"
-            src="http://192.168.6.91:3000/public-dashboards/0e4eb3f75b8c44ada978022f1210b488"
+            :src="projectConfig.grafana_panel_url"
             width="100%"
             height="1000px"
             frameborder="0"
           />
+          <n-empty v-else description="该项目未配置Grafana面板URL" />
         </div>
       </n-tab-pane>
       <n-tab-pane name="export" tab="数据导出">
@@ -35,7 +55,6 @@
           </div>
 
           <n-card class="export-card" :bordered="false">
-            <!-- 时间范围 -->
             <div class="step-item">
               <div class="step-header">
                 <span class="step-num">1</span>
@@ -53,15 +72,14 @@
               </div>
             </div>
 
-            <!-- 字段选择 -->
             <div class="step-item">
               <div class="step-header">
                 <span class="step-num">2</span>
                 <span class="step-title">选择导出字段</span>
               </div>
               <div class="step-content">
-                <div v-if="!exportForm.tableName" class="empty-tip">
-                  <span>请先在数据源配置页面选择数据表</span>
+                <div v-if="!projectConfig?.table_name" class="empty-tip">
+                  <span>该项目未配置数据表</span>
                 </div>
                 <div v-else-if="loadingColumns" class="loading-tip">
                   <n-spin size="small" />
@@ -83,7 +101,6 @@
               </div>
             </div>
 
-            <!-- Action Bar -->
             <div class="action-bar">
               <div class="export-info">
                 <span v-if="exportForm.selectedFields.length">已选择 {{ exportForm.selectedFields.length }} 个字段</span>
@@ -107,19 +124,38 @@
 <script setup>
 import dayjs from 'dayjs'
 import api from '@/api'
+import ModelViewer from '@/components/3d/ModelViewer.vue'
 
-defineOptions({ name: '鄄城取水泵站' })
+defineOptions({ name: '设备详情' })
 
+const route = useRoute()
 const iframeRef = ref(null)
 const isFullscreen = ref(false)
 const exporting = ref(false)
 const loadingColumns = ref(false)
 
-const STORAGE_KEY = 'juancheng_export_config'
+const projectConfig = ref(null)
+const loading = ref(true)
+const error = ref(null)
+
+// 从 grafana_url 字段提取真正的 URL（支持 iframe HTML 或纯 URL）
+const grafanaPidUrl = computed(() => {
+  if (!projectConfig.value?.grafana_url) return null
+  const url = projectConfig.value.grafana_url
+  const match = url.match(/src=["']([^"']+)["']/)
+  return match ? match[1] : url
+})
+
+const columnOptions = ref([])
+const allFields = computed(() => columnOptions.value.map((col) => col.field))
+const isAllSelected = computed(
+  () => columnOptions.value.length > 0 && exportForm.value.selectedFields.length === columnOptions.value.length
+)
+const isIndeterminate = computed(
+  () => exportForm.value.selectedFields.length > 0 && !isAllSelected.value
+)
 
 const defaultForm = {
-  datasourceName: null,
-  tableName: null,
   selectedFields: [],
   startTime: null,
   endTime: null,
@@ -127,62 +163,63 @@ const defaultForm = {
 
 const exportForm = ref({ ...defaultForm })
 
-const columnOptions = ref([])
-
-const isAllSelected = computed(() => columnOptions.value.length > 0 && exportForm.value.selectedFields.length === columnOptions.value.length)
-
-const isIndeterminate = computed(() => exportForm.value.selectedFields.length > 0 && !isAllSelected.value)
-
 onMounted(async () => {
   document.addEventListener('fullscreenchange', () => {
     isFullscreen.value = !!document.fullscreenElement
   })
 
-  // 加载保存的配置
+  // 从路由获取项目路径
+  const projectPath = route.path.split('/').pop()
+  if (!projectPath) {
+    error.value = '缺少项目路径参数'
+    loading.value = false
+    return
+  }
+
+  loading.value = true
+  error.value = null
   try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      const savedConfig = JSON.parse(saved)
-      exportForm.value.datasourceName = savedConfig.datasourceName
-      exportForm.value.tableName = savedConfig.tableName
-      if (savedConfig.datasourceName && savedConfig.tableName) {
-        await loadColumns(savedConfig.tableName)
+    const res = await api.getProjectByPath(projectPath)
+    if (res.code === 200 && res.data) {
+      projectConfig.value = res.data
+      if (res.data.datasource_id && res.data.table_name) {
+        await loadColumns(res.data.table_name)
       }
+    } else {
+      error.value = '项目不存在'
     }
   } catch (e) {
-    console.error('加载配置失败', e)
+    console.error('加载项目配置失败', e)
+    error.value = '加载项目配置失败'
+  } finally {
+    loading.value = false
   }
 })
 
 async function loadColumns(tableName) {
   loadingColumns.value = true
   try {
-    const res = await api.getDataSourceColumns({
-      datasource_name: exportForm.value.datasourceName,
+    const res = await api.getProjectColumns({
+      datasource_id: projectConfig.value.datasource_id,
       table_name: tableName,
     })
     columnOptions.value = res.data || []
-    // 默认全选
-    exportForm.value.selectedFields = columnOptions.value.map((col) => col.field)
+    exportForm.value.selectedFields = allFields.value
   } catch (e) {
     console.error('获取字段列表失败', e)
-    $message.error('获取字段列表失败')
   } finally {
     loadingColumns.value = false
   }
 }
 
 function toggleSelectAll(value) {
-  if (value) {
-    exportForm.value.selectedFields = columnOptions.value.map((col) => col.field)
-  } else {
-    exportForm.value.selectedFields = []
-  }
+  exportForm.value.selectedFields = value ? [...allFields.value] : []
 }
 
 function reverseSelection() {
-  const allFields = columnOptions.value.map((col) => col.field)
-  exportForm.value.selectedFields = allFields.filter((field) => !exportForm.value.selectedFields.includes(field))
+  exportForm.value.selectedFields = allFields.value.filter(
+    (field) => !exportForm.value.selectedFields.includes(field)
+  )
 }
 
 function handleReset() {
@@ -201,21 +238,23 @@ function toggleFullscreen() {
   }
 }
 
-async function handleExport() {
-  if (!exportForm.value.datasourceName) {
-    $message.warning('请先在数据源配置页面选择数据表')
-    return
+function openGrafanaUrl() {
+  if (grafanaPidUrl.value) {
+    window.open(grafanaPidUrl.value, '_blank')
   }
-  if (!exportForm.value.tableName) {
-    $message.warning('请先在数据源配置页面选择数据表')
+}
+
+async function handleExport() {
+  if (!projectConfig.value?.datasource_id || !projectConfig.value?.table_name) {
+    $message.warning('项目未配置数据源和数据表')
     return
   }
 
   exporting.value = true
   try {
     const params = {
-      datasource_name: exportForm.value.datasourceName,
-      table_name: exportForm.value.tableName,
+      datasource_id: projectConfig.value.datasource_id,
+      table_name: projectConfig.value.table_name,
       columns: exportForm.value.selectedFields.join(','),
     }
     if (exportForm.value.startTime) {
@@ -225,11 +264,11 @@ async function handleExport() {
       params.end_time = dayjs(exportForm.value.endTime).format('YYYY-MM-DD HH:mm:ss')
     }
 
-    const blob = await api.exportData(params)
+    const blob = await api.exportProjectData(params)
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${exportForm.value.tableName}_${dayjs().format('YYYYMMDDHHmmss')}.xlsx`
+    link.download = `${projectConfig.value.table_name}_${dayjs().format('YYYYMMDDHHmmss')}.xlsx`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -353,5 +392,21 @@ async function handleExport() {
   margin-top: 16px;
   color: #999;
   font-size: 12px;
+}
+
+.pid-container {
+  width: 100%;
+  height: 800px;
+}
+
+.pid-iframe-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.pid-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 </style>
